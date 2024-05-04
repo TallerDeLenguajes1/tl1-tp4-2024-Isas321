@@ -75,10 +75,10 @@ Nodo *crearNodo(int id){
   return nuevo;
 }
 
-Nodo insertarNodoAlFinal(Nodo **start, Nodo *nuevo){
+void insertarNodoAlFinal(Nodo **start, Nodo *nuevo){
   Nodo *aux=*start;
   if(aux){
-      while (aux->siguiente){
+    while (aux->siguiente){
       aux=aux->siguiente;
     }
     aux->siguiente=nuevo;
@@ -87,30 +87,96 @@ Nodo insertarNodoAlFinal(Nodo **start, Nodo *nuevo){
   }
 }
 
-Nodo insertarNodoAlComienzo(Nodo **start, Nodo *nuevo){
+void insertarNodoAlComienzo(Nodo **start, Nodo *nuevo){
   nuevo->siguiente=*start;
   *start=nuevo;
 }
 
+void buscarPorId(Nodo **startPendiente,Nodo **startRealizada, int id){
+  Nodo *aux=*startPendiente;
+  Nodo *aux2=*startRealizada;
+  if(aux){
+    while (aux && aux->T.TareaID!=id){
+      aux=aux->siguiente;
+    }
+    if(aux==NULL){
+      //printf("\nTarea de id: %d - NO encontrada", id);
+    } else{
+      printf("\n[Tarea Pendiente]");
+      printf("\nID de la tarea: %d",aux->T.TareaID);
+      printf("\nDescripcion:%s",aux->T.Descripcion);
+      printf("\nDuracion: %d",aux->T.Duracion);
+    }
+  } else{
+    //printf("\nLista pendiente vacia");
+  }
+  if(aux2){
+    while (aux2 && aux2->T.TareaID!=id){
+      aux2=aux2->siguiente;
+    }
+    if(aux2==NULL){
+      //printf("\nTarea de id: %d - NO encontrada", id);
+    } else{
+      printf("\n[Tarea Realizada]");
+      printf("\nID de la tarea: %d",aux2->T.TareaID);
+      printf("\nDescripcion:%s",aux2->T.Descripcion);
+      printf("\nDuracion: %d",aux2->T.Duracion);
+    }
+  } else{
+    //printf("\nLista Realizada vacia");
+  }
+
+
+}
+
+void mover_pendiente_a_realizada(Nodo **startPendiente, Nodo **startRealizada, int id){
+  Nodo *aux=*startPendiente;
+  Nodo *anterior=*startPendiente;
+
+  if(aux){
+    while (aux && aux->T.TareaID!=id){
+      anterior=aux;
+      aux=aux->siguiente;
+    }
+    if(aux==NULL){
+      printf("\nTarea de id: %d - NO encontrado", id);
+    } else{
+      printf("\n[Tarea Encontrada]");
+      if(aux==anterior){//primero de la lista
+        printf("\n[1ra posicion]");
+        *startPendiente=aux->siguiente;
+      } else{
+        if(aux->siguiente==NULL){
+          printf("\n[Ultima posicion]");
+          anterior->siguiente=NULL;
+        } else{
+          anterior->siguiente=aux->siguiente;
+        }
+      }
+      aux->siguiente=NULL;
+      aux->siguiente=*startRealizada;
+      *startRealizada=aux;
+    }
+  } else{
+    printf("\nLista vacia");
+  }
+}
+
 int main(){
-  int opcion;
+  int opcion, id;
   Nodo **listaTareasPendientes=crearListaVacia();
   Nodo **listaTareasRealizadas=crearListaVacia();
-  mostrarTareas(listaTareasPendientes);
-  insertarNodoAlFinal(listaTareasPendientes, crearNodo(3));
-  insertarNodoAlComienzo(listaTareasPendientes, crearNodo(4));
-  mostrarTareas(listaTareasPendientes);
-
   do
   {
         printf("\n\nIngrese la operacion a trabajar, presone 0 para salir\n");
         printf("1. Agregar tarea a pendientes\n");              //
-        printf("2. Cambiar tarea de pendiente a realizada\n");
+        printf("2. Cambiar tarea de pendiente a realizada\n");  //
         printf("3. Mostrar tareas pendientes\n");               //
         printf("4. Mostrar tareas realizadas\n");               //
-        printf("5. Buscar tarea por ID\n");
+        printf("5. Buscar tarea por ID\n");                     //
         printf("6. Buscar tarea por palabra\n");
-        printf("Presone 0 para salir\n");
+        printf("0. Para salir\n");
+        printf("Operacion elegida: ");
         scanf("%d", &opcion);
         fflush(stdin);
         switch (opcion)
@@ -118,7 +184,16 @@ int main(){
         case 0: //Salir
           break;
         case 1: 
-          insertarNodoAlComienzo(listaTareasPendientes, crearNodo(4));
+          printf("\nIngrese ID de la tarea pendiente: ");
+          scanf("%d", &id);
+          fflush(stdin);
+          insertarNodoAlFinal(listaTareasPendientes, crearNodo(id));
+          break;
+        case 2: 
+          printf("\nIngrese ID de la tarea que realizo: ");
+          scanf("%d", &id);
+          fflush(stdin);
+          mover_pendiente_a_realizada(listaTareasPendientes, listaTareasRealizadas, id);
           break;
         case 3: 
           mostrarTareas(listaTareasPendientes);
@@ -126,13 +201,22 @@ int main(){
         case 4: 
           mostrarTareas(listaTareasRealizadas);
           break;
-        
+        case 5: 
+          printf("\nIngrese el ID de la tarea a buscar: ");
+          scanf("%d", &id);
+          fflush(stdin);
+          buscarPorId(listaTareasPendientes, listaTareasRealizadas, id);
+          break;
+        case 6: 
+          printf("\nPalabra clave para buscar tarea: ");
+          scanf("%d", &id);
+          fflush(stdin);
+          //buscarPorPalabra(listaTareasPendientes,id);
+          break;
         default:
           printf("\nIngrese una opcion valida");
           break;
         }
   } while (opcion!=0);
-  
-
   return 0;
 }
